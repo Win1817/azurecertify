@@ -238,7 +238,7 @@ router.post("/exams/configure", async (req, res) => {
   const sessionId = randomUUID();
 
   const sessionData = {
-    id: sessionId,
+    sessionId,
     certificationCode,
     mode,
     difficulty,
