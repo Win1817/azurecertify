@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For page transitions and premium micro-interactions"
+  "recharts": "For the topic breakdown charts on the exam results page"
+  "canvas-confetti": "For visual celebration on passing an exam"
+  "@types/canvas-confetti": "Types for canvas-confetti"
+  "date-fns": "For formatting attempt dates easily"
+  "clsx": "For conditional tailwind class merging"
+  "tailwind-merge": "For conditional tailwind class merging"
+
+images:
+  - path: "artifacts/azure-certify/public/images/hero-bg.png"
+    description: "Abstract 3D geometric mesh in deep azure blue and dark charcoal, professional enterprise cloud computing concept, volumetric lighting, highly detailed, 8k resolution, clean background"
+    aspect_ratio: "16:9"
+  - path: "artifacts/azure-certify/public/images/ai-sparkle.png"
+    description: "A glowing, magical artificial intelligence core, deep space blue with cyan and purple energy particles, subtle and minimal"
+    aspect_ratio: "1:1"
+
+notes:
+  - Expects @workspace/api-client-react to be built and exporting React Query hooks
+  - Recharts is used for displaying performance by topic area
+  - App operates completely in dark mode to match Azure aesthetic

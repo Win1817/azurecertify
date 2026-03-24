@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AzureCertify AI Pro API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: exams
+    description: Exam management
+  - name: questions
+    description: Question management
+  - name: attempts
+    description: Exam attempts
+  - name: ai
+    description: AI exam generation and analysis
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,157 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /exams/certifications:
+    get:
+      operationId: getCertifications
+      tags: [exams]
+      summary: Get available certifications
+      responses:
+        "200":
+          description: List of certifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certification"
+
+  /exams/configure:
+    post:
+      operationId: configureExam
+      tags: [exams]
+      summary: Configure and start an exam session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamConfig"
+      responses:
+        "200":
+          description: Exam session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+
+  /exams/sessions/{sessionId}:
+    get:
+      operationId: getExamSession
+      tags: [exams]
+      summary: Get exam session with questions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Exam session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+
+  /exams/sessions/{sessionId}/submit:
+    post:
+      operationId: submitExam
+      tags: [exams]
+      summary: Submit exam answers
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamSubmission"
+      responses:
+        "200":
+          description: Exam results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  /attempts:
+    get:
+      operationId: getAttempts
+      tags: [attempts]
+      summary: Get user exam attempts history
+      responses:
+        "200":
+          description: List of attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attempt"
+
+  /attempts/{attemptId}:
+    get:
+      operationId: getAttempt
+      tags: [attempts]
+      summary: Get specific attempt details with AI analysis
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Attempt details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptDetail"
+
+  /ai/generate-questions:
+    post:
+      operationId: generateQuestions
+      tags: [ai]
+      summary: Generate AI exam questions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateQuestionsRequest"
+      responses:
+        "200":
+          description: Generated and validated questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateQuestionsResponse"
+
+  /ai/analyze-attempt:
+    post:
+      operationId: analyzeAttempt
+      tags: [ai]
+      summary: AI analysis of exam attempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeAttemptRequest"
+      responses:
+        "200":
+          description: AI analysis with study recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptAnalysis"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +188,302 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Certification:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          enum: [AZ-900, AZ-104, AZ-305]
+        name:
+          type: string
+        description:
+          type: string
+        level:
+          type: string
+          enum: [Fundamentals, Associate, Expert]
+        iconColor:
+          type: string
+        topicAreas:
+          type: array
+          items:
+            type: string
+      required: [id, code, name, description, level, iconColor, topicAreas]
+
+    ExamConfig:
+      type: object
+      properties:
+        certificationCode:
+          type: string
+          enum: [AZ-900, AZ-104, AZ-305]
+        mode:
+          type: string
+          enum: [practice, exam]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, mixed]
+        questionCount:
+          type: integer
+          minimum: 10
+          maximum: 60
+        userId:
+          type: string
+      required: [certificationCode, mode, difficulty, questionCount]
+
+    ExamQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              text:
+                type: string
+            required: [key, text]
+        correctAnswer:
+          type: string
+        explanation:
+          type: string
+        topic:
+          type: string
+        difficulty:
+          type: string
+        isAiGenerated:
+          type: boolean
+        validationScore:
+          type: number
+      required: [id, content, options, correctAnswer, explanation, topic, difficulty, isAiGenerated]
+
+    ExamSession:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        certificationCode:
+          type: string
+        mode:
+          type: string
+        difficulty:
+          type: string
+        questionCount:
+          type: integer
+        timeLimitMinutes:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamQuestion"
+        createdAt:
+          type: string
+      required: [sessionId, certificationCode, mode, difficulty, questionCount, timeLimitMinutes, questions, createdAt]
+
+    ExamSubmission:
+      type: object
+      properties:
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+        timeSpentSeconds:
+          type: integer
+      required: [answers, timeSpentSeconds]
+
+    ExamResult:
+      type: object
+      properties:
+        attemptId:
+          type: string
+        score:
+          type: number
+        passed:
+          type: boolean
+        correctCount:
+          type: integer
+        totalCount:
+          type: integer
+        timeSpentSeconds:
+          type: integer
+        questionResults:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              correct:
+                type: boolean
+              userAnswer:
+                type: string
+              correctAnswer:
+                type: string
+              explanation:
+                type: string
+              topic:
+                type: string
+            required: [questionId, correct, userAnswer, correctAnswer, explanation, topic]
+        topicBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              correct:
+                type: integer
+              total:
+                type: integer
+              percentage:
+                type: number
+            required: [topic, correct, total, percentage]
+      required: [attemptId, score, passed, correctCount, totalCount, timeSpentSeconds, questionResults, topicBreakdown]
+
+    Attempt:
+      type: object
+      properties:
+        id:
+          type: string
+        certificationCode:
+          type: string
+        mode:
+          type: string
+        score:
+          type: number
+        passed:
+          type: boolean
+        questionCount:
+          type: integer
+        timeSpentSeconds:
+          type: integer
+        completedAt:
+          type: string
+      required: [id, certificationCode, mode, score, passed, questionCount, timeSpentSeconds, completedAt]
+
+    AttemptDetail:
+      type: object
+      properties:
+        attempt:
+          $ref: "#/components/schemas/Attempt"
+        result:
+          $ref: "#/components/schemas/ExamResult"
+        analysis:
+          $ref: "#/components/schemas/AttemptAnalysis"
+      required: [attempt, result]
+
+    GenerateQuestionsRequest:
+      type: object
+      properties:
+        certificationCode:
+          type: string
+          enum: [AZ-900, AZ-104, AZ-305]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, mixed]
+        count:
+          type: integer
+          minimum: 1
+          maximum: 20
+        topics:
+          type: array
+          items:
+            type: string
+      required: [certificationCode, difficulty, count]
+
+    GenerateQuestionsResponse:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamQuestion"
+        generatedCount:
+          type: integer
+        validatedCount:
+          type: integer
+        rejectedCount:
+          type: integer
+      required: [questions, generatedCount, validatedCount, rejectedCount]
+
+    AnalyzeAttemptRequest:
+      type: object
+      properties:
+        attemptId:
+          type: string
+        certificationCode:
+          type: string
+        score:
+          type: number
+        topicBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              correct:
+                type: integer
+              total:
+                type: integer
+              percentage:
+                type: number
+            required: [topic, correct, total, percentage]
+        questionResults:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              correct:
+                type: boolean
+            required: [topic, correct]
+      required: [attemptId, certificationCode, score, topicBreakdown, questionResults]
+
+    AttemptAnalysis:
+      type: object
+      properties:
+        overallAssessment:
+          type: string
+        weakAreas:
+          type: array
+          items:
+            type: string
+        strongAreas:
+          type: array
+          items:
+            type: string
+        studyPlan:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              priority:
+                type: string
+                enum: [high, medium, low]
+              recommendation:
+                type: string
+              resources:
+                type: array
+                items:
+                  type: string
+            required: [topic, priority, recommendation, resources]
+        nextSteps:
+          type: array
+          items:
+            type: string
+        recommendedNextExam:
+          type: string
+        estimatedReadiness:
+          type: string
+      required: [overallAssessment, weakAreas, strongAreas, studyPlan, nextSteps, estimatedReadiness]

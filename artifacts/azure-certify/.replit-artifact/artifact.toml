@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AzureCertify AI Pro"
+version = "1.0.0"
+id = "artifacts/azure-certify"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18760
+
+[services.development]
+run = "pnpm --filter @workspace/azure-certify run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/azure-certify", "run", "build" ]
+publicDir = "artifacts/azure-certify/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18760"
+BASE_PATH = "/"

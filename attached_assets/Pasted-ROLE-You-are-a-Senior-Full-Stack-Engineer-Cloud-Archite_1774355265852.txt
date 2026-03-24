@@ -1,0 +1,261 @@
+ROLE:  
+You are a Senior Full-Stack Engineer, Cloud Architect, and DevOps Engineer.
+
+---
+
+# 🚀 PROJECT: AzureCertify AI Pro
+
+Build a production-ready, scalable, secure web platform for Azure certification exams (AZ-900 → AZ-305), inspired by Pearson VUE and Credly, with:
+
+- Azure-themed UI
+- Keycloak authentication
+- AI-powered exam generation & validation using Gemini
+- Full DevOps + cloud-native architecture
+
+---
+
+# 🎯 CORE REQUIREMENTS
+
+## 1. 🧭 EXAM PORTAL (PRIMARY ENTRY POINT)
+
+Users must be able to:
+- Select certification:
+  - AZ-900 (Fundamentals)
+  - AZ-104 (Administrator)
+  - AZ-305 (Architect)
+
+- Configure exam:
+  - Mode: Practice / Exam
+  - Difficulty: Easy / Medium / Hard / Mixed
+  - Question count (10–60)
+  - Time limit (dynamic)
+
+---
+
+## 2. 🤖 AI-DRIVEN EXAM SYSTEM (GEMINI)
+
+Use Google Gemini for:
+
+### A. Question Generation
+- Generate Azure-specific exam questions dynamically
+- Must include:
+  - Scenario-based questions
+  - 4–5 answer options
+  - Correct answer
+  - Detailed explanation
+
+### B. Validation Pipeline (MANDATORY)
+- Re-validate generated questions via second AI call
+- Score:
+  - Accuracy
+  - Clarity
+  - Exam relevance
+- Reject low-quality questions automatically
+
+### C. Post-Exam AI Analysis
+- Identify weak areas
+- Suggest study plan
+- Recommend next exam
+
+---
+
+## 3. 🔐 AUTHENTICATION & SECURITY
+
+Use Keycloak:
+
+- OpenID Connect (OIDC)
+- JWT validation in backend
+- RBAC:
+  - Student
+  - Admin
+  - Instructor
+  - Proctor
+
+### Security Requirements:
+- Secure API gateway
+- Token validation middleware
+- Rate limiting
+- Anti-cheating mechanisms:
+  - Tab switch detection
+  - Session integrity checks
+
+---
+
+## 4. 🎨 AZURE-THEMED UI/UX
+
+Inspired by Microsoft Azure Portal:
+
+### Layout:
+- Sidebar navigation
+- Top bar (profile, notifications)
+- Card-based dashboards
+
+### Exam UI:
+- Left: Question navigator
+- Center: Question
+- Top-right: Timer
+- Right: AI Assistant (disabled in exam mode)
+
+### Tech:
+- Next.js + TailwindCSS
+- Fluent UI components
+
+---
+
+# 🏗 SYSTEM ARCHITECTURE (CLOUD-NATIVE)
+
+## Microservices Design:
+
+### Services:
+1. Auth Service (Keycloak)
+2. User Service
+3. Exam Service
+4. AI Service (Gemini integration)
+5. Analytics Service
+
+---
+
+## Infrastructure (Deploy on Microsoft Azure)
+
+### Compute:
+- Azure Kubernetes Service (AKS)
+
+### Storage:
+- Azure PostgreSQL (primary DB)
+- Azure Blob Storage (assets)
+
+### Networking:
+- Azure VNet
+- Private endpoints
+
+### Observability:
+- Azure Monitor
+- Log Analytics
+
+---
+
+# ⚙️ DEVOPS PIPELINE
+
+## CI/CD:
+- GitHub Actions or Azure DevOps
+
+### Pipeline Stages:
+1. Build
+2. Test
+3. Security Scan
+4. Dockerize
+5. Deploy to AKS
+
+---
+
+## Containerization:
+- Docker for all services
+
+---
+
+## Infrastructure as Code:
+- Terraform or Bicep
+
+---
+
+## Monitoring:
+- Metrics + logs + alerts
+
+---
+
+# 🧱 DATABASE DESIGN
+
+### Tables:
+
+Users
+- id, email, role, created_at
+
+Exams
+- id, type, difficulty, duration
+
+Questions
+- id, exam_id, content, options, correct_answer, explanation
+
+AI_Questions
+- id, generated_by_ai, validation_score, confidence
+
+Attempts
+- id, user_id, score, status
+
+Badges
+- id, credential_id, issued_date
+
+---
+
+# 🔄 SYSTEM FLOW
+
+## Exam Flow:
+1. User logs in via Keycloak
+2. Selects exam
+3. System fetches:
+   - Stored + AI-generated questions
+4. User takes exam
+5. Auto-submit + scoring
+6. AI analyzes results
+
+---
+
+## AI Flow:
+1. Generate → Validate → Store → Serve
+2. Analyze performance → Recommend improvements
+
+---
+
+# 🔐 NON-FUNCTIONAL REQUIREMENTS
+
+- High availability
+- Horizontal scalability
+- Secure by design
+- Low latency (<200ms API target)
+- Fault tolerance
+
+---
+
+# 🧪 TESTING
+
+- Unit tests
+- Integration tests
+- Load testing (important for exam concurrency)
+
+---
+
+# 🚀 OPTIONAL ADVANCED FEATURES
+
+- Adaptive testing (AI adjusts difficulty)
+- Real-time proctoring (WebRTC)
+- Multi-language exams
+- Offline exam mode (sync later)
+
+---
+
+# 📦 DELIVERABLES
+
+- Full-stack application
+- Microservices architecture
+- AI integration layer
+- CI/CD pipeline
+- Deployment scripts
+- Documentation
+
+---
+
+# 🎯 SUCCESS CRITERIA
+
+- Feels like real certification platform
+- AI-generated questions are accurate
+- Secure authentication works flawlessly
+- Scalable under load
+- Clean Azure-style UI
+
+---
+
+IMPORTANT:  
+Write clean, modular, production-ready code.  
+Follow best practices in cloud architecture, security, and DevOps.
+
+---
