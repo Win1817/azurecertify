@@ -5,8 +5,11 @@ import examsRouter from "./exams";
 import attemptsRouter from "./attempts";
 import aiRouter from "./ai";
 
+import authRouter from "./auth";
+
 const router: IRouter = Router();
 
+router.use("/auth", authRouter);
 router.use(healthRouter);
 router.use(certificationsRouter);
 router.use(examsRouter);

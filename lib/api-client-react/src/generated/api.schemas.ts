@@ -167,12 +167,15 @@ export type AttemptAnalysisStudyPlanItem = {
 
 export interface AttemptAnalysis {
   overallAssessment: string;
+  mentorMessage?: string;
   weakAreas: string[];
   strongAreas: string[];
   studyPlan: AttemptAnalysisStudyPlanItem[];
   nextSteps: string[];
   recommendedNextExam?: string;
   estimatedReadiness: string;
+  readinessScore?: number;
+  topicInsights?: { [key: string]: string };
 }
 
 export interface AttemptDetail {

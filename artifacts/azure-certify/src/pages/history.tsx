@@ -24,7 +24,7 @@ type SortDir = "asc" | "desc";
 type FilterResult = "all" | "passed" | "failed";
 type FilterMode = "all" | "practice" | "simulation";
 
-export default function HistoryPage() {
+export default function HistoryPage({ noLayout = false }: { noLayout?: boolean, [key: string]: any }) {
   const { data: attempts, isLoading } = useGetAttempts();
   const [search, setSearch] = useState("");
   const [filterResult, setFilterResult] = useState<FilterResult>("all");
@@ -106,8 +106,7 @@ export default function HistoryPage() {
     </button>
   );
 
-  return (
-    <Layout>
+  const content = (
       <div className="space-y-6 animate-in fade-in duration-500 pb-20">
         <div className="flex items-center gap-3">
           <History className="w-7 h-7 text-primary" />
@@ -368,6 +367,8 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
+
+  if (noLayout) return content;
+  return <Layout>{content}</Layout>;
 }

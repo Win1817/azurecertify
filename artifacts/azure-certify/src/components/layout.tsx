@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Cloud, LayoutDashboard, History, Settings, LogOut, ChevronRight } from "lucide-react";
+import { Cloud, LayoutDashboard, Settings, LogOut, ChevronRight, BookOpen, GraduationCap, Award, BarChart3, MessageSquare } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -9,11 +9,33 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [user, setUser] = useState<{name: string, email: string, role: string} | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("azure_user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+      } else {
+        setLocation("/login");
+      }
+    } catch {}
+  }, [setLocation]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("azure_token");
+    localStorage.removeItem("azure_user");
+    setLocation("/");
+  };
 
   const navItems = [
-    { href: "/", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/history", icon: History, label: "Exam History" },
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/learning-hub", icon: BookOpen, label: "Learning Hub" },
+    { href: "/exam-portal", icon: GraduationCap, label: "Exam Portal" },
+    { href: "/certifications", icon: Award, label: "Certifications" },
+    { href: "/analytics", icon: BarChart3, label: "Analytics" },
+    { href: "/feedback", icon: MessageSquare, label: "Feedback" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
@@ -52,16 +74,23 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <div className="p-6 border-t border-white/5">
+        <div className="p-6 border-t border-white/5 space-y-4">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors">
             <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center font-bold shadow-lg">
-              JS
+              {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium">John Smith</span>
-              <span className="text-xs text-muted-foreground">Pro Member</span>
+              <span className="text-sm font-medium">{user?.name || "User"}</span>
+              <span className="text-xs text-muted-foreground capitalize">{user?.role === "admin" ? "Admin" : "Student"}</span>
             </div>
           </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
         </div>
       </div>
 

@@ -20,17 +20,42 @@ interface Message {
   timestamp: Date;
 }
 
+interface ResultsContext {
+  certificationCode: string;
+  score: number;
+  passed: boolean;
+  correctCount: number;
+  totalCount: number;
+  topicBreakdown: { topic: string; percentage: number }[];
+  weakTopics: string[];
+}
+
 interface EzzyChatProps {
   examMode?: boolean;
   certificationCode?: string;
+  resultsContext?: ResultsContext;
 }
 
-const SUGGESTED_QUESTIONS = [
+const DEFAULT_SUGGESTIONS = [
   "What is Azure VNet?",
   "Difference between RBAC and Azure Policy?",
   "Which cert should I start with?",
   "How does Azure Storage replication work?",
 ];
+
+function getResultsSuggestions(ctx: ResultsContext): string[] {
+  const suggestions = [
+    `Why did I score ${ctx.score}% on ${ctx.certificationCode}? What should I focus on?`,
+    `Explain my weak areas: ${ctx.weakTopics.slice(0, 2).join(" and ")}`,
+    `Create a 2-week study plan for my ${ctx.certificationCode} weak topics`,
+  ];
+  if (!ctx.passed) {
+    suggestions.push(`What's the fastest path to passing ${ctx.certificationCode}?`);
+  } else {
+    suggestions.push(`What certification should I take after passing ${ctx.certificationCode}?`);
+  }
+  return suggestions;
+}
 
 function MarkdownContent({ content }: { content: string }) {
   return (
@@ -70,7 +95,7 @@ function MarkdownContent({ content }: { content: string }) {
   );
 }
 
-export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps) {
+export function EzzyChat({ examMode = false, certificationCode, resultsContext }: EzzyChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -113,13 +138,25 @@ export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps)
         content: m.content,
       }));
 
+      const contextPayload: any = { certificationCode: certificationCode || resultsContext?.certificationCode };
+      if (resultsContext) {
+        contextPayload.resultsContext = {
+          score: resultsContext.score,
+          passed: resultsContext.passed,
+          correctCount: resultsContext.correctCount,
+          totalCount: resultsContext.totalCount,
+          weakTopics: resultsContext.weakTopics,
+          topicBreakdown: resultsContext.topicBreakdown,
+        };
+      }
+
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text.trim(),
           history,
-          context: { certificationCode },
+          context: contextPayload,
         }),
       });
 
@@ -146,7 +183,7 @@ export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps)
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, examMode, messages, certificationCode]);
+  }, [isLoading, examMode, messages, certificationCode, resultsContext]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -224,18 +261,33 @@ export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps)
                           <Sparkles className="w-3.5 h-3.5 text-white" />
                         </div>
                         <div className="bg-white/5 rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[85%]">
-                          <p className="leading-relaxed">
-                            Hi! I'm <strong>Ezzy</strong>, your Azure certification expert. 🎯
-                          </p>
-                          <p className="text-muted-foreground mt-1.5 text-xs">
-                            Ask me anything about Azure services, exam strategies, or certification paths.
-                          </p>
+                          {resultsContext ? (
+                            <>
+                              <p className="leading-relaxed">
+                                I've reviewed your <strong>{resultsContext.certificationCode}</strong> results ({resultsContext.score}%). Let me help you improve! 🎯
+                              </p>
+                              <p className="text-muted-foreground mt-1.5 text-xs">
+                                Ask me about your weak areas, study strategies, or next steps.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="leading-relaxed">
+                                Hi! I'm <strong>Ezzy</strong>, your Azure certification expert. 🎯
+                              </p>
+                              <p className="text-muted-foreground mt-1.5 text-xs">
+                                Ask me anything about Azure services, exam strategies, or certification paths.
+                              </p>
+                            </>
+                          )}
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground px-1">Try asking:</p>
-                        {SUGGESTED_QUESTIONS.map((q) => (
+                        <p className="text-xs text-muted-foreground px-1">
+                          {resultsContext ? "Ask about your results:" : "Try asking:"}
+                        </p>
+                        {(resultsContext ? getResultsSuggestions(resultsContext) : DEFAULT_SUGGESTIONS).map((q) => (
                           <button
                             key={q}
                             onClick={() => sendMessage(q)}

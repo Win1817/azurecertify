@@ -186,7 +186,7 @@ router.post("/ai/analyze-attempt", async (req, res) => {
       .filter((t: any) => t.percentage >= 80)
       .map((t: any) => t.topic);
 
-    const prompt = `You are an Azure certification expert career coach. Analyze this ${certificationCode} exam result.
+    const prompt = `You are Ezzy, a senior Azure certification coach and mentor. You speak with warmth, authority, and encouragement — like a real mentor who genuinely cares about the student's success. Analyze this ${certificationCode} exam result.
 
 Exam Score: ${score}%
 Passing score: 70%
@@ -198,31 +198,39 @@ ${(topicBreakdown ?? []).map((t: any) => `- ${t.topic}: ${t.percentage}% (${t.co
 Weak areas (< 70%): ${weakTopics.join(", ") || "None"}
 Strong areas (>= 80%): ${strongTopics.join(", ") || "None"}
 
-Provide a detailed, personalized analysis with:
-1. Overall assessment (2-3 sentences)
-2. Specific weak areas list
-3. Specific strong areas list
-4. Study plan for each weak area with Microsoft Learn resources
-5. 3-5 concrete next steps
-6. Recommended next certification
-7. Estimated exam readiness (e.g., "Ready to pass", "2-3 weeks of study needed", "1 month of intensive study needed")
+Provide a detailed, personalized, mentor-style analysis with:
+1. Overall assessment (2-3 warm, specific sentences — not generic)
+2. A short motivational mentor message (1-2 sentences, personal and encouraging)
+3. Specific weak areas list (be specific about what sub-topics within them are weak)
+4. Specific strong areas list
+5. Study plan for EACH weak area with Microsoft Learn resources and specific topics to focus on
+6. 3-5 concrete, actionable next steps prioritized by impact
+7. Recommended next certification path
+8. Estimated exam readiness as a descriptive phrase (e.g., "Ready to pass", "2-3 weeks of focused study needed")
+9. A numeric readiness score from 0-100 (integer) based on overall performance, topic coverage breadth, and weak area severity
+10. For each topic in the breakdown, provide a one-sentence key insight about what went right or wrong
 
 Return ONLY valid JSON, no extra text:
 {
   "overallAssessment": "...",
+  "mentorMessage": "...",
   "weakAreas": ["area1", "area2"],
   "strongAreas": ["area1"],
   "studyPlan": [
     {
       "topic": "topic name",
       "priority": "high|medium|low",
-      "recommendation": "what to study",
+      "recommendation": "what to study — be specific with sub-topics",
       "resources": ["Microsoft Learn: ...", "Azure Docs: ..."]
     }
   ],
   "nextSteps": ["step1", "step2", "step3"],
   "recommendedNextExam": "AZ-104 or AZ-305 or...",
-  "estimatedReadiness": "..."
+  "estimatedReadiness": "...",
+  "readinessScore": 72,
+  "topicInsights": {
+    "Topic Name": "One sentence insight about performance in this topic"
+  }
 }`;
 
     const response = await ai.models.generateContent({
@@ -256,7 +264,18 @@ router.post("/ai/chat", async (req, res) => {
   const { message, history, context } = req.body as {
     message: string;
     history?: ChatMessage[];
-    context?: { certificationCode?: string; examMode?: boolean };
+    context?: {
+      certificationCode?: string;
+      examMode?: boolean;
+      resultsContext?: {
+        score: number;
+        passed: boolean;
+        correctCount: number;
+        totalCount: number;
+        weakTopics: string[];
+        topicBreakdown: { topic: string; percentage: number }[];
+      };
+    };
   };
 
   if (!message) {
@@ -264,9 +283,21 @@ router.post("/ai/chat", async (req, res) => {
     return;
   }
 
-  const certContext = context?.certificationCode
+  let certContext = context?.certificationCode
     ? `The user is currently studying for the ${context.certificationCode} Azure certification exam.`
     : "The user is on an Azure certification study platform.";
+
+  if (context?.resultsContext) {
+    const rc = context.resultsContext;
+    certContext += `\n\nIMPORTANT: The user is reviewing their exam results. Here is the context:
+- Certification: ${context.certificationCode}
+- Score: ${rc.score}% (${rc.passed ? "PASSED" : "FAILED"})
+- Correct: ${rc.correctCount}/${rc.totalCount}
+- Weak Topics: ${rc.weakTopics.join(", ") || "None"}
+- Topic Performance: ${rc.topicBreakdown.map(t => `${t.topic}: ${t.percentage}%`).join(", ")}
+
+Use this data to provide personalized, actionable guidance. Be specific about what they should study for each weak topic. Act as a supportive mentor.`;
+  }
 
   const systemPrompt = `You are Ezzy, an expert AI assistant for AzureCertify AI Pro — a professional Azure certification exam platform. You are knowledgeable about all Microsoft Azure services, architecture patterns, and all Azure certification exams (AZ-900, AZ-104, AZ-204, AZ-305, AZ-400, AZ-500, AZ-700, AZ-140, DP-203, AI-102 and more).
 
@@ -274,6 +305,7 @@ ${certContext}
 
 Your personality:
 - Professional, clear, and encouraging — like a senior Azure architect who loves teaching
+- Warm and mentoring — you genuinely care about the student's success
 - Concise but thorough: structured responses with a Definition, Example, and Exam Tip when relevant
 - Always aligned with current Microsoft documentation and best practices
 - Honest: if something changed in Azure recently, acknowledge it
@@ -285,6 +317,7 @@ Your capabilities:
 - Generate similar practice questions when asked
 - Explain why answers are correct or incorrect
 - Give real-world examples using Azure services
+- Analyze exam results and provide personalized feedback
 
 Always structure technical answers as:
 1. Direct answer (1-2 sentences)
