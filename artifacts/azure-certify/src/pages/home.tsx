@@ -14,6 +14,7 @@ export default function Home() {
       case 'fundamentals': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
       case 'associate': return 'text-green-400 bg-green-400/10 border-green-400/20';
       case 'expert': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
+      case 'specialty': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
       default: return 'text-gray-400 bg-gray-400/10 border-gray-400/20';
     }
   };
@@ -147,7 +148,7 @@ export default function Home() {
                         <td className="p-4 font-semibold">{attempt.certificationCode}</td>
                         <td className="p-4 text-muted-foreground capitalize">{attempt.mode}</td>
                         <td className="p-4 font-display font-medium">
-                          {attempt.score}/1000
+                          {attempt.score}%
                         </td>
                         <td className="p-4">
                           <span className={cn(

@@ -1,0 +1,274 @@
+**ROLE:**
+You are a Senior Full-Stack Engineer, Cloud Architect, and DevOps Engineer.
+
+---
+
+# 🚀 PROJECT: AzureCertify AI Pro (with Ezzy AI Assistant)
+
+Build a **production-ready, scalable Azure certification platform** similar to Pearson VUE + Credly, with:
+
+* Azure-themed UI
+* Keycloak authentication
+* AI-generated & validated exams (Gemini)
+* Integrated AI chatbot assistant named **Ezzy**
+* Full Azure certification coverage (Fundamentals → Expert → Specialty)
+
+---
+
+# 🤖 AI CHATBOT: EZZY (CORE FEATURE)
+
+## 🎯 Overview
+
+Add an intelligent AI chatbot named **Ezzy** that acts as a:
+
+* Azure tutor
+* Exam assistant
+* Certification guide
+* Troubleshooting helper
+
+Powered by Google Gemini or Azure OpenAI.
+
+---
+
+## 🧠 Ezzy Capabilities
+
+### 1. 💬 General Azure Q&A
+
+Users can ask:
+
+* “What is Azure VNet?”
+* “Difference between RBAC and Policy?”
+* “How does Azure Storage replication work?”
+
+Ezzy must:
+
+* Provide accurate, concise answers
+* Include real-world examples
+* Align with Microsoft best practices
+
+---
+
+### 2. 📚 Certification Guidance
+
+Ezzy helps users:
+
+* Choose the right certification path
+* Example:
+
+  * Beginner → AZ-900
+  * Admin → AZ-104
+  * Architect → AZ-305
+
+---
+
+## 🎓 FULL AZURE CERTIFICATION COVERAGE
+
+Include ALL major Azure certifications:
+
+### 🟢 Fundamentals
+
+* AZ-900 (Azure Fundamentals)
+
+### 🔵 Associate
+
+* AZ-104 (Azure Administrator)
+* AZ-204 (Azure Developer)
+* AZ-500 (Azure Security Engineer)
+
+### 🟣 Expert
+
+* AZ-305 (Azure Solutions Architect)
+
+### 🟡 Specialty (IMPORTANT)
+
+* AZ-400 (DevOps Engineer)
+* AZ-700 (Network Engineer)
+* AZ-140 (Virtual Desktop)
+* DP-203 (Data Engineering)
+* AI-102 (AI Engineer)
+
+Each certification must have:
+
+* Learning modules
+* Practice exams
+* AI-generated exams
+* Progress tracking
+
+---
+
+## 3. 🧪 Exam Assistance (CONTROLLED)
+
+### Practice Mode:
+
+* Ezzy can:
+
+  * Explain answers
+  * Provide hints
+  * Generate similar questions
+
+### Exam Mode:
+
+* Ezzy is STRICTLY DISABLED
+
+---
+
+## 4. 📊 Post-Exam Analysis
+
+Ezzy analyzes:
+
+* Weak topics
+* Mistakes
+* Study recommendations
+
+Example output:
+“You are weak in Azure Networking and RBAC. Focus on VNets and NSGs.”
+
+---
+
+## 5. 🧠 AI Prompt Intelligence
+
+Ezzy must:
+
+* Understand Azure context deeply
+* Use structured responses:
+
+  * Definition
+  * Example
+  * Exam tip
+
+---
+
+# 🧭 EXAM PORTAL
+
+Users can:
+
+* Select certification (ALL Azure exams)
+* Choose:
+
+  * Mode (Practice / Exam)
+  * Difficulty
+  * Question count
+  * Time limit
+
+---
+
+# 🤖 AI EXAM GENERATION PIPELINE
+
+Use Google Gemini:
+
+### Flow:
+
+1. Generate questions
+2. Validate questions
+3. Assign confidence score
+4. Store in DB
+5. Serve to users
+
+---
+
+# 🔐 AUTHENTICATION
+
+Use Keycloak:
+
+* SSO (OIDC)
+* JWT validation
+* RBAC roles
+
+---
+
+# 🎨 UI/UX (AZURE STYLE)
+
+Inspired by Microsoft Azure Portal:
+
+### Add Ezzy UI:
+
+* Floating chat button (bottom-right)
+* Expandable chat panel
+* Clean, Copilot-style interface
+
+---
+
+# 🏗 ARCHITECTURE
+
+## Services:
+
+* Auth Service (Keycloak)
+* Exam Service
+* AI Service (Gemini + Ezzy)
+* User Service
+* Analytics Service
+
+---
+
+## Cloud Deployment
+
+Use Microsoft Azure:
+
+* AKS (Kubernetes)
+* Azure PostgreSQL
+* Azure Blob Storage
+* Azure Monitor
+
+---
+
+# ⚙️ DEVOPS
+
+* CI/CD (GitHub Actions / Azure DevOps)
+* Docker containers
+* Infrastructure as Code (Terraform/Bicep)
+
+---
+
+# 🔐 SECURITY
+
+* Token validation
+* Role enforcement
+* Anti-cheat system
+* Disable Ezzy in exam mode
+
+---
+
+# 🧪 DATABASE ADDITIONS
+
+### ChatLogs
+
+* id
+* user_id
+* message
+* response
+* timestamp
+
+---
+
+# 🚀 ADVANCED FEATURES
+
+* Voice-enabled Ezzy
+* Multi-language support
+* AI adaptive learning
+* Personalized exam difficulty
+
+---
+
+# 📦 DELIVERABLES
+
+* Full-stack system
+* AI chatbot (Ezzy)
+* Exam engine
+* DevOps pipeline
+* Deployment scripts
+
+---
+
+# 🎯 SUCCESS CRITERIA
+
+* Ezzy answers Azure questions accurately
+* All certifications available
+* Realistic exam experience
+* Secure & scalable platform
+
+---
+
+**IMPORTANT:**
+Ezzy must behave like a professional Azure expert and certification coach.
+
+---
