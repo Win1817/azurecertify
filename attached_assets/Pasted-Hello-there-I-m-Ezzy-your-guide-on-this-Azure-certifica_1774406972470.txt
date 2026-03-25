@@ -1,0 +1,27 @@
+Hello there! I'm Ezzy, your guide on this Azure certification journey. Let's demystify Azure VNet for you.
+
+### What is Azure VNet?
+
+Definition:
+
+An Azure Virtual Network (VNet) is a logical isolation of the Azure cloud dedicated to your subscription, acting as your own private network in the cloud where you can securely run your Azure resources.
+
+Explanation with Real-World Context:
+
+Think of Azure VNet as your own private data center network within Azure. Just as you'd have a physical network in your on-premises data center with routers, switches, and firewalls, Azure VNet provides the same capabilities virtually. It allows your Azure resources, such as Virtual Machines, Azure Kubernetes Service, and Azure App Service, to securely communicate with each other, the internet, and even your on-premises networks (via VPN Gateway or ExpressRoute).
+
+Key features of VNets include:
+
+* **Isolation:** Your VNet is logically isolated from other VNets in Azure.
+
+* **Segmentation:** You can divide your VNet into smaller subnets for organizing and securing resources.
+
+* **Connectivity:** Resources within a VNet can communicate with each other. You can also connect VNets to each other (VNet Peering) or to your on-premises data centers.
+
+* **Security:** You can control inbound and outbound traffic using Network Security Groups (NSGs) and Azure Firewall.
+
+For example, if you're deploying a multi-tier application (web, application, database), you'd typically place each tier in its own subnet within a VNet, applying NSGs to control traffic flow between them and to the internet, just as you would with VLANs and firewalls in a traditional data center.
+
+Exam Tip:
+
+Azure VNet is a foundational networking service and is a very common topic across almost all Azure certification exams (AZ-900, AZ-104, AZ-305, AZ-700, etc.). Understand its core purpose, how to create subnets, configure NSGs, and establish connectivity (VNet Peering, VPN Gateway, ExpressRoute). Always remember that VNets provide *private* and *secure* communication for your Azure resources.

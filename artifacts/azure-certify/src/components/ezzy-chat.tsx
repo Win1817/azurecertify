@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
-  MessageCircle,
   X,
   Send,
   Loader2,
@@ -119,23 +120,41 @@ export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps)
     setShowSuggestions(true);
   };
 
-  const formatContent = (content: string) => {
-    return content
-      .split("\n")
-      .map((line, i) => {
-        if (line.startsWith("**") && line.endsWith("**")) {
-          return <p key={i} className="font-semibold mt-2 mb-1">{line.slice(2, -2)}</p>;
-        }
-        if (line.match(/^\d+\.\s/)) {
-          return <p key={i} className="ml-3 my-0.5">{line}</p>;
-        }
-        if (line.startsWith("- ") || line.startsWith("• ")) {
-          return <p key={i} className="ml-3 my-0.5">{line}</p>;
-        }
-        if (line.trim() === "") return <div key={i} className="h-1" />;
-        return <p key={i} className="my-0.5 leading-relaxed">{line}</p>;
-      });
-  };
+  const MarkdownContent = ({ content }: { content: string }) => (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => <p className="font-bold text-base mt-2 mb-1">{children}</p>,
+        h2: ({ children }) => <p className="font-bold text-sm mt-2 mb-1">{children}</p>,
+        h3: ({ children }) => <p className="font-semibold text-sm mt-2 mb-1 text-primary/90">{children}</p>,
+        p: ({ children }) => <p className="my-1 leading-relaxed text-sm">{children}</p>,
+        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+        em: ({ children }) => <em className="italic text-muted-foreground">{children}</em>,
+        ul: ({ children }) => <ul className="my-1.5 space-y-0.5 pl-1">{children}</ul>,
+        ol: ({ children }) => <ol className="my-1.5 space-y-0.5 pl-1 list-decimal list-inside">{children}</ol>,
+        li: ({ children }) => (
+          <li className="text-sm flex items-start gap-1.5">
+            <span className="text-primary mt-1 shrink-0">•</span>
+            <span>{children}</span>
+          </li>
+        ),
+        code: ({ children, className }) => {
+          const isBlock = className?.includes("language-");
+          return isBlock ? (
+            <code className="block bg-black/30 rounded-lg p-2 text-xs font-mono my-1.5 overflow-x-auto">{children}</code>
+          ) : (
+            <code className="bg-black/30 rounded px-1 py-0.5 text-xs font-mono">{children}</code>
+          );
+        },
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-primary/50 pl-3 my-1.5 text-muted-foreground italic text-sm">{children}</blockquote>
+        ),
+        hr: () => <hr className="border-white/10 my-2" />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 
   return (
     <>
@@ -251,8 +270,8 @@ export function EzzyChat({ examMode = false, certificationCode }: EzzyChatProps)
                           : "bg-white/5 rounded-tl-sm"
                       )}>
                         {msg.role === "assistant"
-                          ? <div className="space-y-0.5">{formatContent(msg.content)}</div>
-                          : <p className="leading-relaxed">{msg.content}</p>
+                          ? <MarkdownContent content={msg.content} />
+                          : <p className="leading-relaxed text-sm">{msg.content}</p>
                         }
                       </div>
                     </motion.div>
