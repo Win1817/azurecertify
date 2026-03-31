@@ -6,10 +6,12 @@ import attemptsRouter from "./attempts";
 import aiRouter from "./ai";
 
 import authRouter from "./auth";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
 router.use("/auth", authRouter);
+router.use("/admin", adminRouter);
 router.use(healthRouter);
 router.use(certificationsRouter);
 router.use(examsRouter);

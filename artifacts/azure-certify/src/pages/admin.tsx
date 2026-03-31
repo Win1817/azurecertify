@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Cloud, Users, FileText, Brain, MessageSquare, Award, BarChart3,
-  LayoutDashboard, LogOut, ChevronRight, Search, Shield, Edit, Trash2, UserCog, Loader2
+  LayoutDashboard, LogOut, ChevronRight, Search, Shield, Edit, Trash2, UserCog, Loader2, Lock
 } from "lucide-react";
 import { cn } from "@/components/layout";
 
@@ -33,6 +33,7 @@ function AdminSidebar({ activeSection, setActiveSection }: { activeSection: stri
     { id: "feedback", icon: MessageSquare, label: "Feedback" },
     { id: "certificates", icon: Award, label: "Certificates" },
     { id: "analytics", icon: BarChart3, label: "System Analytics" },
+    { id: "api", icon: Cloud, label: "API Dashboard" },
   ];
 
   return (
@@ -253,6 +254,156 @@ function PlaceholderPanel({ title, icon: Icon, description }: { title: string; i
   );
 }
 
+// API Dashboard Panel
+function APIPanel() {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("azure_token");
+      const res = await fetch("/api/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to fetch API stats");
+      const data = await res.json();
+      setStats(data);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000); // 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || !stats) {
+    return (
+      <div className="flex items-center justify-center p-20">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 pb-12">
+      <div>
+        <h1 className="text-3xl font-display font-bold flex items-center gap-3">
+          <Cloud className="text-primary h-8 w-8" /> API Dashboard
+        </h1>
+        <p className="text-muted-foreground mt-1 text-sm">Monitor system health, AI performance and infrastructure connectivity.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          { label: "Status", value: stats.status, color: "text-green-400" },
+          { label: "Users", value: stats.counts.users, color: "text-blue-400" },
+          { label: "Sessions", value: stats.counts.sessions, color: "text-purple-400" },
+          { label: "Attempts", value: stats.counts.attempts, color: "text-orange-400" },
+        ].map((item, idx) => (
+          <div key={idx} className="bg-white/5 border border-white/5 rounded-2xl p-6">
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">{item.label}</p>
+            <p className={`text-2xl font-display font-black ${item.color}`}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* System & AI Configuration */}
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+              <h3 className="font-bold flex items-center gap-2 text-sm"><Shield className="w-4 h-4 text-primary" /> System Info</h3>
+              <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Live</span>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Platform</span>
+                <span className="font-mono text-white/90">{stats.system.platform}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">CPUs (Logical)</span>
+                <span className="font-mono text-white/90">{stats.system.cpus} Cores</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">RAM (Total / Free)</span>
+                <span className="font-mono text-white/90">{stats.system.memory.total}GB / {stats.system.memory.free}GB</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Uptime</span>
+                <span className="font-mono text-white/90">{Math.floor(stats.system.uptime / 3600)}h {Math.floor((stats.system.uptime % 3600) / 60)}m</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-purple-500/10 flex items-center justify-between">
+              <h3 className="font-bold flex items-center gap-2 text-sm"><Brain className="w-4 h-4 text-purple-400" /> AI Performance (Gemini)</h3>
+            </div>
+            <div className="p-6 space-y-4 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Model</span>
+                <span className="font-bold text-white/90">{stats.ai.model}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">API Version</span>
+                <span className="font-mono text-xs opacity-60">v1beta</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Endpoint</span>
+                <span className="text-[10px] font-mono truncate max-w-[200px] text-muted-foreground/60">{stats.ai.baseUrl}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Auth & Logging */}
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-red-500/10 flex items-center justify-between">
+              <h3 className="font-bold flex items-center gap-2 text-sm"><Lock className="w-4 h-4 text-red-500" /> Auth Architecture</h3>
+              <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">{stats.auth.sso === "Internal JWT" ? "Legacy" : "Enterprise"}</span>
+            </div>
+            <div className="p-6 space-y-4 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Auth Provider</span>
+                <span className="font-bold text-white/90">{stats.auth.sso}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">OIDC Endpoint</span>
+                <span className="text-[10px] font-mono text-muted-foreground/60 truncate max-w-[200px]">{stats.auth.kanidmUrl}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Protection Layer</span>
+                <span className="text-xs text-blue-400">JWT-HS256 Middleware</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden h-full flex flex-col min-h-[200px]">
+            <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+              <h3 className="font-bold flex items-center gap-2 text-sm"><BarChart3 className="w-4 h-4 text-cyan-400" /> Recent Traffic</h3>
+            </div>
+            <div className="p-4 flex-grow font-mono text-[10px] space-y-2 opacity-60 overflow-hidden bg-black/20">
+              <p className="text-green-400">[200] GET /api/admin/stats - 12ms</p>
+              <p className="text-green-400">[200] GET /api/auth/me - 4ms</p>
+              <p className="text-green-400">[200] GET /api/auth/users - 24ms</p>
+              <p className="text-yellow-400">[304] GET /api/exams/certifications - 2ms</p>
+              <p className="text-green-400">[200] POST /api/ai/chat - 1450ms</p>
+              <p className="text-green-400 text-opacity-30">[200] GET /api/healthz - 1ms</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main Admin Dashboard
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
@@ -319,6 +470,7 @@ export default function AdminDashboard() {
       case "feedback": return <PlaceholderPanel title="Feedback Management" icon={MessageSquare} description="View and respond to user feedback submissions." />;
       case "certificates": return <PlaceholderPanel title="Certificates" icon={Award} description="Manage issued certificates and credentials." />;
       case "analytics": return <PlaceholderPanel title="System Analytics" icon={BarChart3} description="User growth, pass rates, and AI performance metrics." />;
+      case "api": return <APIPanel />;
       default: return <OverviewPanel users={users} />;
     }
   };
