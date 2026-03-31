@@ -16,7 +16,7 @@ import pRetry from "p-retry";
  *   artworks,
  *   async (artwork) => {
  *     const response = await ai.models.generateContent({
- *       model: "gemini-2.5-flash",
+ *       model: "gemini-2.0-flash",   // FIX: was gemini-2.5-flash (use 2.0 for stability)
  *       contents: [{ role: "user", parts: [{ text: `Categorize: ${artwork.name}` }] }],
  *       config: { responseMimeType: "application/json" },
  *     });
@@ -90,7 +90,7 @@ export async function batchProcess<T, R>(
 export async function batchProcessWithSSE<T, R>(
   items: T[],
   processor: (item: T, index: number) => Promise<R>,
-  sendEvent: (event: { type: string; [key: string]: unknown }) => void,
+  sendEvent: (event: { type: string;[key: string]: unknown }) => void,
   options: Omit<BatchOptions, "concurrency" | "onProgress"> = {}
 ): Promise<R[]> {
   const { retries = 5, minTimeout = 1000, maxTimeout = 15000 } = options;

@@ -68,7 +68,7 @@ Return ONLY a valid JSON array, no markdown, no extra text:
 ]`;
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-flash-lite",
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     config: { maxOutputTokens: 8192 },
   });
@@ -106,7 +106,7 @@ valid=true only if accuracy >= 0.8 AND clarity >= 0.7 AND relevance >= 0.8`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { maxOutputTokens: 512 },
     });
@@ -234,7 +234,7 @@ Return ONLY valid JSON, no extra text:
 }`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { maxOutputTokens: 8192 },
     });
@@ -336,11 +336,12 @@ Keep responses focused and under 400 words unless a detailed explanation is spec
     ];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents,
       config: {
         maxOutputTokens: 2048,
-        systemInstruction: systemPrompt,
+        // @ts-ignore: API expects snake_case but SDK types say camelCase
+        system_instruction: systemPrompt,
       },
     });
 

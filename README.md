@@ -18,7 +18,7 @@
 | **Frontend** | React 19 + Vite + TailwindCSS + Framer Motion + Recharts |
 | **Backend** | Express 5 (ESM) |
 | **Database** | PostgreSQL + Drizzle ORM |
-| **AI Engine** | Google Gemini (`gemini-2.5-flash`) via `@google/genai` |
+| **AI Engine** | Google Gemini (`gemini-2.5-flash-lite`) via `@google/genai` |
 | **Auth** | JWT (bcryptjs) — Keycloak-ready architecture |
 | **Validation** | Zod (v4) + drizzle-zod |
 | **API Codegen** | Orval (from OpenAPI spec) |

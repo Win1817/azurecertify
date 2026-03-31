@@ -62,8 +62,11 @@ function EzzyWrapper() {
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import Dashboard from "@/pages/dashboard";
 import LearningHub from "@/pages/learning-hub";
 import AdminDashboard from "@/pages/admin";
+import Feedback from "@/pages/feedback";
+import Analytics from "@/pages/analytics";
 
 function Router() {
   return (
@@ -72,7 +75,9 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/admin" component={AdminDashboard} />
-      <Route path="/dashboard" component={LearningHub} /> {/* Temporarily point dashboard to Learning Hub overview */}
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/feedback" component={Feedback} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/learning-hub" component={LearningHub} />
       <Route path="/exam-portal" component={Home} />
       <Route path="/certifications" component={Home} />

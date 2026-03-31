@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: azurecertify-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/azurecertify
+      - JWT_SECRET=azurecertify-super-secret-key-12345
+      - AI_INTEGRATIONS_GEMINI_API_KEY=${AI_INTEGRATIONS_GEMINI_API_KEY}
+      - AI_INTEGRATIONS_GEMINI_BASE_URL=${AI_INTEGRATIONS_GEMINI_BASE_URL}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: azurecertify-frontend
+    ports:
+      - "4000:80"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: azurecertify-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: azurecertify
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

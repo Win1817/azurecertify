@@ -15,7 +15,7 @@ if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
 export const ai = new GoogleGenAI({
   apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
   httpOptions: {
-    apiVersion: "",
+    apiVersion: "v1",           // FIX: was "" which defaulted to v1beta
     baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
   },
 });
@@ -24,7 +24,7 @@ export async function generateImage(
   prompt: string
 ): Promise<{ b64_json: string; mimeType: string }> {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-image",
+    model: "gemini-2.5-flash-lite",
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     config: {
       responseModalities: [Modality.TEXT, Modality.IMAGE],
