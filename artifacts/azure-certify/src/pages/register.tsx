@@ -110,6 +110,8 @@ export default function Register() {
                 </div>
                 <input
                   type="text"
+                  name="username"
+                  id="username"
                   required
                   value={username}
                   onChange={e => setUsername(e.target.value)}
