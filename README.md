@@ -54,8 +54,8 @@
 - **Internal Auth**: JWT-based with bcrypt password hashing
 - **User Roles**: `student` and `admin`
 - **Registration & Login**: Email-based authentication
-- **Default Admin**: `admin@azurecertify.com` / `Admin` (seeded on first startup)
-- **Keycloak-Ready**: Modular `AuthService` design for future migration
+- **Default Admin**: `admin` / `admin` (seeded on first startup)
+- **Kanidm-Ready**: Modular `AuthService` design for future migration
 
 ### 🧑‍💼 Admin Dashboard (`/admin`)
 - **RBAC Protected**: Admin-only access with 403 redirect
@@ -182,7 +182,7 @@ pnpm --filter @workspace/azure-certify run dev
 - **Landing Page**: http://localhost:3000
 - **Login**: http://localhost:3000/login
 - **Admin**: http://localhost:3000/admin
-- **Default Admin**: `admin@azurecertify.com` / `Admin`
+- **Default Admin**: `admin` / `admin`
 
 ---
 

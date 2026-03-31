@@ -28,16 +28,16 @@ app.listen(port, "0.0.0.0", async (err?: Error) => {
 
   // Seed default admin
   try {
-    const existingAdmins = await db.select().from(usersTable).where(eq(usersTable.email, "admin@azurecertify.com")).limit(1);
+    const existingAdmins = await db.select().from(usersTable).where(eq(usersTable.email, "admin")).limit(1);
     if (existingAdmins.length === 0) {
-      const passwordHash = await bcrypt.hash("Admin", 10);
+      const passwordHash = await bcrypt.hash("admin", 10);
       await db.insert(usersTable).values({
-        name: "Admin",
-        email: "admin@azurecertify.com",
+        name: "Default Admin",
+        email: "admin",
         passwordHash,
         role: "admin"
       });
-      logger.info("Default Admin user seeded successfully");
+      logger.info("Default Admin (admin/admin) user seeded successfully");
     }
   } catch (seedErr) {
     logger.error({ err: seedErr }, "Failed to seed admin user");

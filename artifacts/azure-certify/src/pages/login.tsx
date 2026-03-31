@@ -90,7 +90,7 @@ export default function Login() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none transition-all"
-                  placeholder="admin@azurecertify.com"
+                  placeholder="admin"
                 />
               </div>
             </div>
