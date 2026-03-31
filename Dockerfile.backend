@@ -9,8 +9,6 @@ COPY lib/ ./lib/
 COPY artifacts/api-server/ ./artifacts/api-server/
 
 RUN pnpm install
-# Debug: show drizzle-kit bin files
-RUN find /app/node_modules/.pnpm -path "*/drizzle-kit/bin*" -type f 2>/dev/null | head -10
 RUN pnpm --filter @workspace/api-server run build
 
 # Stage 2: Production
