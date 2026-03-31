@@ -11,6 +11,7 @@ services:
       - PORT=5000
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/azurecertify
       - JWT_SECRET=azurecertify-super-secret-key-12345
+      - KANIDM_TLS_SKIP_VERIFY=${KANIDM_TLS_SKIP_VERIFY:-false}
     ports:
       - "5000:5000"
     depends_on:

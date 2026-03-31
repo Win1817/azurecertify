@@ -1,4 +1,5 @@
 import { Router } from "express";
+import https from "https";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -146,6 +147,31 @@ router.get("/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// Kanidm TLS helper — supports self-signed certs via KANIDM_TLS_SKIP_VERIFY=true
+const _kanidmFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  if (process.env.KANIDM_TLS_SKIP_VERIFY === "true") {
+    const { default: https } = await import("https");
+    const agent = new https.Agent({ rejectUnauthorized: false });
+    // Use undici dispatcher for native fetch TLS override
+    try {
+      const { Agent } = await import("undici");
+      const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+      return fetch(url, { ...options, dispatcher } as any);
+    } catch {
+      // fallback: temporarily disable TLS verification
+      const prev = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      try {
+        return await fetch(url, options);
+      } finally {
+        if (prev === undefined) delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+        else process.env.NODE_TLS_REJECT_UNAUTHORIZED = prev;
+      }
+    }
+  }
+  return fetch(url, options);
+};
+
 // Kanidm SSO Routes
 const KANIDM_URL = process.env.KANIDM_URL || "https://idm.example.com";
 const KANIDM_CLIENT_ID = process.env.KANIDM_CLIENT_ID || "azure-certify-pro";
@@ -164,7 +190,7 @@ router.get("/kanidm/callback", async (req, res) => {
     if (!code) throw new Error("No authorization code provided");
 
     // Exchange code for token
-    const tokenRes = await fetch(`${KANIDM_URL}/oauth2/token`, {
+    const tokenRes = await _kanidmFetch(`${KANIDM_URL}/oauth2/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
@@ -180,7 +206,7 @@ router.get("/kanidm/callback", async (req, res) => {
     const tokens = (await tokenRes.json()) as { access_token: string };
 
     // Get user info
-    const userRes = await fetch(`${KANIDM_URL}/oauth2/openid/${KANIDM_CLIENT_ID}/userinfo`, {
+    const userRes = await _kanidmFetch(`${KANIDM_URL}/oauth2/openid/${KANIDM_CLIENT_ID}/userinfo`, {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     });
 

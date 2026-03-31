@@ -62,6 +62,7 @@ router.get("/oidc", requireAdmin, async (req, res) => {
     scopes: process.env.KANIDM_SCOPES || "openid email profile",
     frontendUrl: process.env.FRONTEND_URL || "",
     enabled: !!process.env.KANIDM_URL && !!process.env.KANIDM_CLIENT_ID && !!process.env.KANIDM_CLIENT_SECRET,
+    tlsSkipVerify: process.env.KANIDM_TLS_SKIP_VERIFY === "true",
   });
 });
 
@@ -72,9 +73,19 @@ router.post("/oidc/test", requireAdmin, async (req, res) => {
     return res.status(400).json({ success: false, message: "KANIDM_URL is not configured" });
   }
   try {
+    // Support self-signed TLS for internal Kanidm instances
+    let fetchOptions: any = { signal: AbortSignal.timeout(5000) };
+    if (process.env.KANIDM_TLS_SKIP_VERIFY === "true") {
+      try {
+        const { Agent } = await import("undici");
+        fetchOptions.dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+      } catch {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      }
+    }
     const response = await fetch(
       `${kanidmUrl}/oauth2/openid/${process.env.KANIDM_CLIENT_ID || "azure-certify-pro"}/.well-known/openid-configuration`,
-      { signal: AbortSignal.timeout(5000) }
+      fetchOptions
     );
     if (!response.ok) throw new Error(`OIDC discovery returned ${response.status}`);
     const discovery = await response.json() as Record<string, unknown>;

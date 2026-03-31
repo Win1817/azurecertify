@@ -502,6 +502,7 @@ function OIDCPanel() {
               { label: "Redirect URI", value: config?.redirectUri || "Not set", key: "redirectUri", secret: false },
               { label: "Scopes", value: config?.scopes || "Not set", key: "scopes", secret: false },
               { label: "Frontend URL", value: config?.frontendUrl || "Not set", key: "frontendUrl", secret: false },
+              { label: "TLS Skip Verify", value: config?.tlsSkipVerify ? "true (self-signed allowed)" : "false (strict)", key: "tlsSkipVerify", secret: false },
             ].map(({ label, value, key, secret }) => (
               <div key={key} className="flex justify-between items-center gap-4">
                 <span className="text-muted-foreground shrink-0">{label}</span>
@@ -567,7 +568,7 @@ function OIDCPanel() {
               </div>
               <div className="space-y-2 text-xs text-muted-foreground">
                 <p className="font-semibold text-white/60 uppercase tracking-wider text-[10px]">Required .env variables</p>
-                {["KANIDM_URL", "KANIDM_CLIENT_ID", "KANIDM_CLIENT_SECRET", "REDIRECT_URI", "FRONTEND_URL"].map(v => (
+                {["KANIDM_URL", "KANIDM_CLIENT_ID", "KANIDM_CLIENT_SECRET", "REDIRECT_URI", "FRONTEND_URL", "KANIDM_TLS_SKIP_VERIFY"].map(v => (
                   <div key={v} className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full shrink-0 ${config?.[v.toLowerCase().replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase())] ? "bg-green-400" : "bg-red-400/50"}`}></span>
                     <code className="font-mono text-white/50">{v}</code>
