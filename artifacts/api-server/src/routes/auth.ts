@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
@@ -46,22 +46,29 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, username, password } = req.body;
     
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "Name, email and password required" });
+    if (!name || !username || !password) {
+      return res.status(400).json({ error: "Name, Username and password required" });
     }
 
-    const existingUser = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-    
-    if (existingUser.length > 0) {
-      return res.status(400).json({ error: "Email already exists" });
+    if (email) {
+      const existingUser = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+      if (existingUser.length > 0) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+    }
+
+    const existingUsername = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
+    if (existingUsername.length > 0) {
+      return res.status(400).json({ error: "Username already exists" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const [newUser] = await db.insert(usersTable).values({
       name,
       email,
+      username,
       passwordHash,
       role: "student"
     }).returning();
@@ -80,13 +87,16 @@ router.post("/register", async (req, res) => {
 // Login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body; // identifier can be email or username
     
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+    if (!identifier || !password) {
+      return res.status(400).json({ error: "Email/Username and password required" });
     }
 
-    const users = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    // Try finding by email or username
+    const users = await db.select().from(usersTable).where(
+      sql`${usersTable.email} = ${identifier} OR ${usersTable.username} = ${identifier}`
+    ).limit(1);
     const user = users[0];
 
     if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
@@ -189,6 +199,7 @@ router.get("/kanidm/callback", async (req, res) => {
       const [newUser] = await db.insert(usersTable).values({
         name: profile.name || profile.preferred_username || "SSO User",
         email: profile.email,
+        username: profile.preferred_username || profile.email.split("@")[0] || profile.sub,
         kanidmId: profile.sub,
         role: "student",
       }).returning();
