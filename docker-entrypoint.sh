@@ -4,16 +4,20 @@ set -e
 echo "[entrypoint] Running database schema push..."
 cd /app/lib/db
 
-# drizzle-kit is a devDep, find it from the build-copied node_modules
-DRIZZLE_KIT=$(find /app/node_modules -name "drizzle-kit" -type f | grep "bin/drizzle-kit.cjs" | head -1)
+# Find drizzle-kit entry point dynamically
+DRIZZLE_BIN=$(find /app/node_modules/.pnpm -path "*/drizzle-kit*/bin/drizzle-kit.cjs" 2>/dev/null | head -1)
 
-if [ -z "$DRIZZLE_KIT" ]; then
-  # fallback: try direct path
-  DRIZZLE_KIT="/app/node_modules/drizzle-kit/bin/drizzle-kit.cjs"
+if [ -z "$DRIZZLE_BIN" ]; then
+  DRIZZLE_BIN=$(find /app/node_modules -path "*/drizzle-kit/bin/drizzle-kit.cjs" 2>/dev/null | head -1)
 fi
 
-node "$DRIZZLE_KIT" push --config ./drizzle.config.cjs --force
-echo "[entrypoint] Schema push complete."
+if [ -z "$DRIZZLE_BIN" ]; then
+  echo "[entrypoint] WARNING: drizzle-kit not found, skipping schema push"
+else
+  echo "[entrypoint] Using drizzle-kit at: $DRIZZLE_BIN"
+  node "$DRIZZLE_BIN" push --config ./drizzle.config.cjs --force
+  echo "[entrypoint] Schema push complete."
+fi
 
 cd /app
 exec "$@"
