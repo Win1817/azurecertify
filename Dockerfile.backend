@@ -9,9 +9,8 @@ COPY lib/ ./lib/
 COPY artifacts/api-server/ ./artifacts/api-server/
 
 RUN pnpm install
-# Show drizzle-kit location for debugging
-RUN find /app/node_modules -name "drizzle-kit.cjs" 2>/dev/null || echo "drizzle-kit.cjs not found"
-RUN find /app/node_modules -path "*/drizzle-kit/package.json" 2>/dev/null | head -3
+# Debug: show drizzle-kit bin files
+RUN find /app/node_modules/.pnpm -path "*/drizzle-kit/bin*" -type f 2>/dev/null | head -10
 RUN pnpm --filter @workspace/api-server run build
 
 # Stage 2: Production
