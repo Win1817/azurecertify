@@ -16,6 +16,7 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 import { db } from "@workspace/db";
+import { seedLearningPaths } from "./routes/learning";
 import { usersTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -40,6 +41,8 @@ app.listen(port, "0.0.0.0", async (err?: Error) => {
         role: "admin"
       });
       logger.info(`Default Admin (admin/${adminPassword === 'admin' ? 'admin' : '********'}) user seeded successfully`);
+    // Seed learning paths
+    try { await seedLearningPaths(); logger.info("Learning paths seeded"); } catch (e) { logger.warn("Learning paths seed skipped"); }
     }
   } catch (seedErr) {
     logger.error({ err: seedErr }, "Failed to seed admin user");
