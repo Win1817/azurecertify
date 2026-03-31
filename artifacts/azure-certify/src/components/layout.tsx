@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Cloud, LayoutDashboard, Settings, LogOut, ChevronRight, BookOpen, GraduationCap, Award, BarChart3, MessageSquare, Sparkles, X } from "lucide-react";
+import { Cloud, LayoutDashboard, Settings, LogOut, ChevronRight, BookOpen, GraduationCap, Award, BarChart3, MessageSquare } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -11,7 +11,6 @@ export function cn(...inputs: ClassValue[]) {
 export function Layout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const [user, setUser] = useState<{name: string, email: string, role: string} | null>(null);
-  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     try {
@@ -99,36 +98,6 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Subtle top glow */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50 z-20"></div>
-
-        {/* Dynamic Banner */}
-        {import.meta.env.VITE_BANNER_ENABLED === "true" && showBanner && (
-          <div className="mx-4 mt-4 md:mx-8 md:mt-6 mb-2 relative group animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 via-purple-500/50 to-cyan-500/50 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative bg-[#0d0d0d] border border-white/10 rounded-2xl px-6 py-3.5 flex items-center justify-between gap-4 overflow-hidden">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold text-white tracking-tight">Announcement</span>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {import.meta.env.VITE_BANNER_MESSAGE || "Welcome to the new AzureCertify platform!"}
-                  </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowBanner(false)}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                title="Dismiss"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              
-              {/* Decorative accent */}
-              <div className="absolute top-0 right-12 w-24 h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent skew-x-[-20deg] pointer-events-none"></div>
-            </div>
-          </div>
-        )}
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8">
           <div className="max-w-6xl mx-auto h-full">

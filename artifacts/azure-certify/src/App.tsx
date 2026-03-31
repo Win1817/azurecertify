@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { EzzyChat } from "@/components/ezzy-chat";
+import { GlobalBanner } from "@/components/banner";
 
 import Home from "@/pages/home";
 import ConfigureExam from "@/pages/configure";
@@ -104,6 +105,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <GlobalBanner />
           <Router />
           <EzzyWrapper />
         </WouterRouter>
