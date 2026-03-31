@@ -29,13 +29,13 @@ app.listen(port, "0.0.0.0", async (err?: Error) => {
   // Seed default admin
   try {
     const adminPassword = process.env.ADMIN_PASSWORD || "admin";
-    const existingAdmins = await db.select().from(usersTable).where(eq(usersTable.email, "admin")).limit(1);
+    const existingAdmins = await db.select().from(usersTable).where(eq(usersTable.username, "admin")).limit(1);
     if (existingAdmins.length === 0) {
       const passwordHash = await bcrypt.hash(adminPassword, 10);
       await db.insert(usersTable).values({
         name: "Default Admin",
         username: "admin",
-        email: "admin",
+        email: "admin@azurecertify.com",
         passwordHash,
         role: "admin"
       });

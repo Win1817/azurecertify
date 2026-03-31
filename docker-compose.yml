@@ -20,6 +20,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        - VITE_BANNER_ENABLED=${VITE_BANNER_ENABLED:-false}
+        - VITE_BANNER_MESSAGE=${VITE_BANNER_MESSAGE:-}
+        - VITE_BANNER_VARIANT=${VITE_BANNER_VARIANT:-info}
     container_name: azurecertify-frontend
     ports:
       - "4000:80"

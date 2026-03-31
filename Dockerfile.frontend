@@ -6,6 +6,14 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
+# Build-time env vars for Vite (VITE_* vars are baked into the JS bundle at build time)
+ARG VITE_BANNER_ENABLED=false
+ARG VITE_BANNER_MESSAGE=""
+ARG VITE_BANNER_VARIANT=info
+ENV VITE_BANNER_ENABLED=$VITE_BANNER_ENABLED
+ENV VITE_BANNER_MESSAGE=$VITE_BANNER_MESSAGE
+ENV VITE_BANNER_VARIANT=$VITE_BANNER_VARIANT
+
 # Copy root configurations and workspaces
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
 COPY lib/ ./lib/
