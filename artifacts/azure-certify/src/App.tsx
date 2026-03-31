@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-import { useGetAttempt } from "@workspace/api-client-react";
+import { useGetAttempt, useGetExamSession } from "@workspace/api-client-react";
 
 function EzzyWrapper() {
   const [location] = useLocation();
@@ -30,9 +30,12 @@ function EzzyWrapper() {
   const isResultsRoute = location.startsWith("/results/") || location.startsWith("/analysis/");
   const certCode = isConfigureRoute ? location.split("/")[2] : undefined;
 
-  // Extract attemptId from results/analysis routes
+  // Extract attemptId and sessionId
   const attemptId = isResultsRoute ? location.split("/")[2] : undefined;
+  const sessionId = isExamRoute ? location.split("/")[2] : undefined;
+
   const { data: attemptData } = useGetAttempt(attemptId ?? "");
+  const { data: sessionData } = useGetExamSession(sessionId ?? "");
 
   // Build results context for Ezzy when on results/analysis pages
   const resultsContext = attemptData ? {
@@ -50,10 +53,14 @@ function EzzyWrapper() {
       .map((t: any) => t.topic),
   } : undefined;
 
+  // Only disable Ezzy in 'exam' mode, allow in 'practice' mode
+  const isPracticeMode = sessionData?.mode === "practice";
+  const effectivelyDisabled = isExamRoute && !isPracticeMode;
+
   return (
     <EzzyChat
-      examMode={isExamRoute}
-      certificationCode={certCode || resultsContext?.certificationCode}
+      examMode={effectivelyDisabled}
+      certificationCode={certCode || resultsContext?.certificationCode || sessionData?.certificationCode}
       resultsContext={resultsContext}
     />
   );
