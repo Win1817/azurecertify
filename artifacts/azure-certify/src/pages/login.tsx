@@ -141,8 +141,12 @@ export default function Login() {
             onClick={() => window.location.href = "/api/auth/kanidm/login"}
             className="w-full py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5 shadow-lg group"
           >
-            <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <Lock className="w-3.5 h-3.5 text-white/70 group-hover:text-primary transition-colors" />
+            <div className="w-8 h-8 flex items-center justify-center p-0.5">
+              <img 
+                src={`${import.meta.env.BASE_URL}images/kanidm-logo.png`} 
+                alt="KanIDM" 
+                className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-110 transition-transform" 
+              />
             </div>
             Sign in with Kanidm SSO
           </button>
