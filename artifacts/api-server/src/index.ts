@@ -28,16 +28,18 @@ app.listen(port, "0.0.0.0", async (err?: Error) => {
 
   // Seed default admin
   try {
+    const adminPassword = process.env.ADMIN_PASSWORD || "admin";
     const existingAdmins = await db.select().from(usersTable).where(eq(usersTable.email, "admin")).limit(1);
     if (existingAdmins.length === 0) {
-      const passwordHash = await bcrypt.hash("admin", 10);
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
       await db.insert(usersTable).values({
         name: "Default Admin",
+        username: "admin",
         email: "admin",
         passwordHash,
         role: "admin"
       });
-      logger.info("Default Admin (admin/admin) user seeded successfully");
+      logger.info(`Default Admin (admin/${adminPassword === 'admin' ? 'admin' : '********'}) user seeded successfully`);
     }
   } catch (seedErr) {
     logger.error({ err: seedErr }, "Failed to seed admin user");

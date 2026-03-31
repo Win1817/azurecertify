@@ -151,9 +151,10 @@ const KANIDM_URL = process.env.KANIDM_URL || "https://idm.example.com";
 const KANIDM_CLIENT_ID = process.env.KANIDM_CLIENT_ID || "azure-certify-pro";
 const KANIDM_CLIENT_SECRET = process.env.KANIDM_CLIENT_SECRET || "";
 const REDIRECT_URI = process.env.REDIRECT_URI || "http://localhost:5000/api/auth/kanidm/callback";
+const KANIDM_SCOPES = process.env.KANIDM_SCOPES || "openid email profile";
 
 router.get("/kanidm/login", (req, res) => {
-  const authUrl = `${KANIDM_URL}/ui/oauth2/authorize?client_id=${KANIDM_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=openid+email+profile`;
+  const authUrl = `${KANIDM_URL}/ui/oauth2/authorize?client_id=${KANIDM_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(KANIDM_SCOPES).replace(/%20/g, "+")}`;
   res.redirect(authUrl);
 });
 
@@ -222,7 +223,7 @@ router.get("/kanidm/callback", async (req, res) => {
       <script>
         localStorage.setItem("azure_token", "${token}");
         localStorage.setItem("azure_user", JSON.stringify(${JSON.stringify({ id: user.id, name: user.name, email: user.email, role: user.role })}));
-        window.location.href = "${user.role === 'admin' ? '/admin' : '/dashboard'}";
+        window.location.href = "${frontendUrl}${user.role === 'admin' ? '/admin' : '/dashboard'}";
       </script>
     `);
   } catch (err: any) {
