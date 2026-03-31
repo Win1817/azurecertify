@@ -125,6 +125,26 @@ export default function Login() {
             </button>
           </form>
 
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[#111111] px-4 text-muted-foreground font-semibold">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => window.location.href = "/api/auth/kanidm/login"}
+            className="w-full py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5 shadow-lg group"
+          >
+            <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Lock className="w-3.5 h-3.5 text-white/70 group-hover:text-primary transition-colors" />
+            </div>
+            Sign in with Kanidm SSO
+          </button>
+
           <div className="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account? <Link href="/register" className="text-primary cursor-pointer hover:underline font-medium">Create Account</Link>
           </div>

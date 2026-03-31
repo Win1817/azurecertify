@@ -5,7 +5,8 @@ export const usersTable = pgTable("users", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  passwordHash: text("password_hash"), // Nullable for SSO users
+  kanidmId: text("kanidm_id").unique(),
   role: varchar("role", { length: 50 }).notNull().default("student"), // "student" or "admin"
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
