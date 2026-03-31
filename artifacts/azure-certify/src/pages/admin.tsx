@@ -3,7 +3,8 @@ import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Cloud, Users, FileText, Brain, MessageSquare, Award, BarChart3,
-  LayoutDashboard, LogOut, ChevronRight, Search, Shield, Edit, Trash2, UserCog, Loader2, Lock
+  LayoutDashboard, LogOut, ChevronRight, Search, Shield, Edit, Trash2, UserCog, Loader2, Lock,
+  KeyRound, CheckCircle2, XCircle, RefreshCw, Copy, ExternalLink
 } from "lucide-react";
 import { cn } from "@/components/layout";
 
@@ -34,6 +35,7 @@ function AdminSidebar({ activeSection, setActiveSection }: { activeSection: stri
     { id: "certificates", icon: Award, label: "Certificates" },
     { id: "analytics", icon: BarChart3, label: "System Analytics" },
     { id: "api", icon: Cloud, label: "API Dashboard" },
+    { id: "oidc", icon: KeyRound, label: "OIDC Configuration" },
   ];
 
   return (
@@ -404,6 +406,182 @@ function APIPanel() {
   );
 }
 
+
+// OIDC Configuration Panel
+function OIDCPanel() {
+  const [config, setConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; issuer?: string; authEndpoint?: string } | null>(null);
+  const { toast } = useToast();
+
+  const fetchConfig = async () => {
+    try {
+      const token = localStorage.getItem("azure_token");
+      const res = await fetch("/api/admin/oidc", { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error("Failed to fetch OIDC config");
+      setConfig(await res.json());
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testConnection = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const token = localStorage.getItem("azure_token");
+      const res = await fetch("/api/admin/oidc/test", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      setTestResult(data);
+    } catch (err: any) {
+      setTestResult({ success: false, message: err.message });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied", description: `${label} copied to clipboard` });
+  };
+
+  useEffect(() => { fetchConfig(); }, []);
+
+  if (loading) {
+    return <div className="flex items-center justify-center p-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
+  }
+
+  const callbackUrl = `${window.location.origin.replace(":4000", ":5000")}/api/auth/kanidm/callback`;
+
+  return (
+    <div className="space-y-8 pb-12">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-display font-bold flex items-center gap-3">
+            <KeyRound className="text-primary h-8 w-8" /> OIDC Configuration
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Kanidm SSO integration status and configuration reference.</p>
+        </div>
+        <button onClick={fetchConfig} className="p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-white transition-colors" title="Refresh">
+          <RefreshCw className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Status Badge */}
+      <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl border ${config?.enabled ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20"}`}>
+        {config?.enabled
+          ? <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+          : <XCircle className="h-5 w-5 text-red-400 shrink-0" />}
+        <div>
+          <p className={`font-bold text-sm ${config?.enabled ? "text-green-400" : "text-red-400"}`}>
+            {config?.enabled ? "OIDC Enabled — Kanidm SSO is active" : "OIDC Disabled — Required environment variables are missing"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {config?.enabled
+              ? "Users can sign in via Kanidm SSO. The login page shows the SSO button."
+              : "Set KANIDM_URL, KANIDM_CLIENT_ID, and KANIDM_CLIENT_SECRET in your .env to enable SSO."}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Current Configuration */}
+        <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" />
+            <h3 className="font-bold text-sm">Current Configuration</h3>
+          </div>
+          <div className="p-6 space-y-4 text-sm">
+            {[
+              { label: "Provider URL", value: config?.kanidmUrl || "Not set", key: "kanidmUrl", secret: false },
+              { label: "Client ID", value: config?.clientId || "Not set", key: "clientId", secret: false },
+              { label: "Client Secret", value: config?.clientSecret || "Not set", key: "clientSecret", secret: true },
+              { label: "Redirect URI", value: config?.redirectUri || "Not set", key: "redirectUri", secret: false },
+              { label: "Scopes", value: config?.scopes || "Not set", key: "scopes", secret: false },
+              { label: "Frontend URL", value: config?.frontendUrl || "Not set", key: "frontendUrl", secret: false },
+            ].map(({ label, value, key, secret }) => (
+              <div key={key} className="flex justify-between items-center gap-4">
+                <span className="text-muted-foreground shrink-0">{label}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`font-mono text-xs truncate max-w-[200px] ${value === "Not set" ? "text-red-400/70" : "text-white/80"}`}>
+                    {value}
+                  </span>
+                  {!secret && value !== "Not set" && (
+                    <button onClick={() => copyToClipboard(value, label)} className="shrink-0 p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors">
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Connection Test + Setup Guide */}
+        <div className="space-y-6">
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-blue-500/10 flex items-center gap-2">
+              <ExternalLink className="w-4 h-4 text-blue-400" />
+              <h3 className="font-bold text-sm">Connection Test</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-muted-foreground">Tests reachability of the Kanidm OIDC discovery endpoint using the configured KANIDM_URL.</p>
+              <button
+                onClick={testConnection}
+                disabled={testing || !config?.enabled}
+                className="w-full py-3 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary font-bold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+              >
+                {testing ? <><Loader2 className="h-4 w-4 animate-spin" /> Testing...</> : "Test OIDC Connection"}
+              </button>
+              {testResult && (
+                <div className={`flex items-start gap-3 p-4 rounded-xl border text-sm ${testResult.success ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20"}`}>
+                  {testResult.success
+                    ? <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    : <XCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />}
+                  <div className="space-y-1">
+                    <p className={`font-semibold ${testResult.success ? "text-green-400" : "text-red-400"}`}>{testResult.message}</p>
+                    {testResult.issuer && <p className="text-xs text-muted-foreground font-mono">Issuer: {testResult.issuer}</p>}
+                    {testResult.authEndpoint && <p className="text-xs text-muted-foreground font-mono truncate">Auth: {testResult.authEndpoint}</p>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Callback URL */}
+          <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-orange-500/10 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-orange-400" />
+              <h3 className="font-bold text-sm">Kanidm OAuth2 App Setup</h3>
+            </div>
+            <div className="p-6 space-y-4 text-sm">
+              <p className="text-xs text-muted-foreground">Register this as the redirect URI in your Kanidm OAuth2 application:</p>
+              <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-4 py-3">
+                <code className="text-xs font-mono text-cyan-300 flex-1 break-all">{callbackUrl}</code>
+                <button onClick={() => copyToClipboard(callbackUrl, "Callback URL")} className="shrink-0 p-1.5 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors">
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p className="font-semibold text-white/60 uppercase tracking-wider text-[10px]">Required .env variables</p>
+                {["KANIDM_URL", "KANIDM_CLIENT_ID", "KANIDM_CLIENT_SECRET", "REDIRECT_URI", "FRONTEND_URL"].map(v => (
+                  <div key={v} className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${config?.[v.toLowerCase().replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase())] ? "bg-green-400" : "bg-red-400/50"}`}></span>
+                    <code className="font-mono text-white/50">{v}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main Admin Dashboard
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
@@ -471,6 +649,7 @@ export default function AdminDashboard() {
       case "certificates": return <PlaceholderPanel title="Certificates" icon={Award} description="Manage issued certificates and credentials." />;
       case "analytics": return <PlaceholderPanel title="System Analytics" icon={BarChart3} description="User growth, pass rates, and AI performance metrics." />;
       case "api": return <APIPanel />;
+      case "oidc": return <OIDCPanel />;
       default: return <OverviewPanel users={users} />;
     }
   };
