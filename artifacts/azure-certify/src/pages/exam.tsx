@@ -36,16 +36,51 @@ export default function ExamInterface() {
     return () => clearInterval(interval);
   }, [session, isLoading, incrementTime]);
 
-  // Anti-cheat (tab switching)
+  // Anti-cheat (tab/window switching)
   useEffect(() => {
+    // Only enforce in exam mode — register once session is known
+    if (!session || session.mode !== 'exam') return;
+
+    let lastHidden = false; // debounce double-fires
+
     const handleVisibilityChange = () => {
-      if (document.hidden && session?.mode === 'exam') {
-        setAntiCheatWarnings(prev => prev + 1);
+      if (document.hidden && !lastHidden) {
+        lastHidden = true;
+        setAntiCheatWarnings(prev => {
+          const next = prev + 1;
+          // Auto-submit after 3 violations
+          if (next >= 3) {
+            submit({ sessionId, data: { answers, timeSpentSeconds, autoSubmitted: true } });
+          }
+          return next;
+        });
+      } else if (!document.hidden) {
+        lastHidden = false;
       }
     };
+
+    const handleWindowBlur = () => {
+      // Catches: DevTools open, alt-tab to another app, window focus lost
+      if (!document.hidden) {
+        // Tab is still "visible" but window lost focus — count as suspicious
+        setAntiCheatWarnings(prev => {
+          const next = prev + 1;
+          if (next >= 3) {
+            submit({ sessionId, data: { answers, timeSpentSeconds, autoSubmitted: true } });
+          }
+          return next;
+        });
+      }
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [session]);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [session, answers, timeSpentSeconds, sessionId, submit]);
 
   if (isLoading || !session) {
     return (
@@ -119,10 +154,13 @@ export default function ExamInterface() {
           >
             <AlertTriangle />
             <div>
-              <p className="font-bold">Warning: Tab Switched</p>
-              <p className="text-sm opacity-90">Please remain in the exam window. ({antiCheatWarnings} warnings)</p>
+              <p className="font-bold">Warning: Focus Lost ({antiCheatWarnings}/3)</p>
+              <p className="text-sm opacity-90">
+                {antiCheatWarnings >= 2
+                  ? "Final warning! One more violation will auto-submit your exam."
+                  : "Do not switch tabs or windows during an exam."}
+              </p>
             </div>
-            <button onClick={() => setAntiCheatWarnings(0)} className="ml-4 opacity-50 hover:opacity-100">&times;</button>
           </motion.div>
         )}
       </AnimatePresence>
